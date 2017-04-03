@@ -1,5 +1,5 @@
 import abc
 
 
-class Dataset(abc.ABCMeta):
-    pass
+class IDataset:
+    __metaclass__ = abc.ABCMeta
