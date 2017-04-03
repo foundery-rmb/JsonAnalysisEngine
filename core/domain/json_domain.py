@@ -1,14 +1,9 @@
-from JsonAnalysisEngine.interfaces.domain.json_domain import BaseNode
-from JsonAnalysisEngine.interfaces.domain.json_domain import IListNode
-from JsonAnalysisEngine.interfaces.domain.json_domain import ITreeNode
-from JsonAnalysisEngine.interfaces.domain.json_domain import IValueNode
-from JsonAnalysisEngine.interfaces.domain.json_domain import IValueListNode
 
-
-
-class BaseNode(BaseNode):
+class BaseNode(object):
     
-    def __init__(self): pass
+    def __init__(self, value):
+        if isinstance(value, dict):
+            self.raw_value = value
 
     def get_parent(self): pass
 
@@ -17,17 +12,26 @@ class BaseNode(BaseNode):
     def get_number_of_occurances(self): pass
 
 
-class ListNode(BaseNode, IListNode):
+class ListNode(BaseNode):
     pass
 
 
-class TreeNode(BaseNode, ITreeNode):
+class TreeNode(BaseNode):
     pass
 
 
-class ValueListNode(BaseNode, IValueListNode):
+class ValueNode(BaseNode):
     pass
 
 
-class ValueNode(BaseNode, IValueNode):
-    pass
+def get_node_type(json_data):
+    """
+    returns the node type of `json_data` can either `ValueNode`, `ValueListNode`, etc
+    """
+
+    if isinstance(json_data.value, dict):
+        return TreeNode
+    elif isinstance(json_data.value, list):
+        return ListNode
+    else:
+        return ValueNode

@@ -17,3 +17,6 @@ class EngineCrash(Error):
     """
     This is raised during a catastrophic crash or error
     """
+
+class ElementBuildError(Error):
+    pass

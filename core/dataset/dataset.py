@@ -1,6 +1,11 @@
 
-from JsonAnalysisEngine.interfaces.dataset import IDataset
+class Dataset(object):
+    pass
 
 
-class Dataset(IDataset):
+class KeysDataset(Dataset, list):
+    pass
+
+
+class ValuesDataset(Dataset, list):
     pass

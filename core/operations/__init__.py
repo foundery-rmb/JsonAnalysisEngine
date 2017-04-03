@@ -1,28 +1,51 @@
 from JsonAnalysisEngine.utils import JsonObject
-from JsonAnalysisEngine.core.exceptions import BindError
-from JsonAnalysisEngine.core.domain.json_domain import BaseNode
+from JsonAnalysisEngine.internal.factory import Factory
 from JsonAnalysisEngine.core.domain.json_domain import ListNode
 from JsonAnalysisEngine.core.domain.json_domain import TreeNode
-from JsonAnalysisEngine.core.domain.json_domain import TreeNode
 from JsonAnalysisEngine.core.domain.json_domain import ValueNode
-from JsonAnalysisEngine.core.domain.json_domain import ValueListNode
+from JsonAnalysisEngine.core.exceptions import BindError, ElementBuildError
+
+import JsonAnalysisEngine.core.domain.json_domain as domain
 
 import weakref
 
 
 class NodeExplorer(object):
     
+    def __init__(self):
+        self.json_data = None
+
+    def set_data(self, data):
+        self.json_data = data
+
     def on_traversal(self, node_info):
         """
         this method is hooked on the `json_traversal` recursion loop
         """
-        pass
+        print domain.get_node_type(node_info)
 
     def attach_action(self, action):
         """
-        this methof is used to attach an action to be performed on the node
+        this method is used to attach an action to be performed on the node
         """
         pass
+
+    def on_done(self, status):
+        """
+        this method is called when the traversal process is done
+        """
+        pass
+
+    def start_session(self, **kwargs):
+        """
+        This is used to start the traversal process and build a dataset
+        """
+        coreop = Factory.CoreOperations
+        coreop.bind(on_traversal=self.on_traversal)
+        coreop.bind(on_traversal_done=self.on_done)
+        if not self.json_data:
+            raise ElementBuildError("No json data set to ElementBuilder")
+        Factory.CoreOperations.start_traversing(self.json_data)
     
 
 class CoreOperations(object):
@@ -31,7 +54,7 @@ class CoreOperations(object):
     capabilities to build node datasets which are essential in running the analysis component
     """
 
-    binds = {'on_traversal': []}
+    binds = {'on_traversal': [], 'on_traversal_done': []}
     on_traversal_binds = {}
 
     def bind(self, **kwargs):
@@ -46,20 +69,47 @@ class CoreOperations(object):
         bind_list = self.binds.get(key, None)
         if bind_list is None:
             raise BindError('could not bind to event %s' % key)
-        bind_list.append(weakref.proxy(function))
+        bind_list.append(function)
         return True
 
-    @staticmethod
-    def _on_traversal(info):
+    def _on_traversal(self, info):
         """
         This is dispatched when the traversal algorithm is active.
         """
 
-        for func in self.binds['on_traversal']:
-            func(info)
+        map(lambda func: func(info), self.binds['on_traversal'])
 
-    @staticmethod
-    def json_traversal(json_dict, func, depth=0):
+
+    def _on_traversal_done(self, info):
+        """
+        this acts as a dispatcher to all functions hooked to the on_done
+        event
+        """
+        map(lambda func: func(info), self.binds['on_traversal_done'])
+
+    def start_traversing(self, json_data):
+        """
+        this method starts the traversal algorithm
+        """
+
+        def _callback(info, event='on_traversal'):
+            """
+            This callback function will process info and call bound methods
+            """
+            info = JsonObject(info)
+            if isinstance(info.value, dict):
+                info['value'] = JsonObject(info.value)
+            if isinstance(info.key, dict):
+                info['key'] = JsonObject(info.key)
+            if event == 'on_traversal':
+                self._on_traversal(info)
+            elif event == 'on_traversal_done':
+                self._on_traversal_done(info)
+            else:
+                raise ValueError('No callback event named %s' % event)
+        self.json_traversal(json_data, _callback)
+
+    def json_traversal(self, json_dict, func, depth=0):
         """
         This is the main traversal algorithm of the JAEngine. While traversing through the
         tree the algorithm calls `func`.
@@ -71,10 +121,16 @@ class CoreOperations(object):
             info['key'] = key
             info['value'] = json_dict[key]
             info['parent'] = json_dict
-            func(info)
+            func(info, event='on_traversal')
             if isinstance(json_dict[key], dict):
-                json_traversal(json_dict[key], func, depth + 1)
+                self.json_traversal(json_dict[key], func, depth + 1)
             if isinstance(json_dict[key], list):
                 for val in json_dict[key]:
                     if isinstance(val, dict):
-                        json_traversal(val, func, depth)
+                        self.json_traversal(val, func, depth)
+        func(None, event='on_done')
+        
+        
+
+Factory.register('CoreOperations', cls=CoreOperations())
+Factory.register('ElementBuilder', cls=NodeExplorer())
