@@ -41,6 +41,7 @@ classname before you re-assign it::
 __all__ = ('Factory', 'FactoryException')
 
 import logging as Logger  # resolve depency issues
+import inspect
 
 class FactoryException(Exception):
     pass
@@ -119,6 +120,15 @@ class FactoryBase(object):
                      if self.classes[x]['filename'] == filename]
         for name in to_remove:
             del self.classes[name]
+
+    def create_object(self, _class, *args):
+        """
+        This is a class instantiator
+        """
+
+        if isinstance(_class, type) or inspect.isclass(_class):
+            return _class(*args)
+        raise ValueError("%s is not a class" % _class)
 
     def __getattr__(self, name):
         classes = self.classes

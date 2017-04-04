@@ -19,7 +19,7 @@ class NodeExplorer(object):
         this method is hooked on the `json_traversal` recursion loop
         """
         node_class = domain.get_node_type(node_info)  # returns ValueNode, ListNode or TreeNode class
-        node = node_class(node_info)  # instantiate the class
+        node = Factory.create_object(node_class, node_info)  # instantiate the class
         print node
 
     def attach_action(self, action):
