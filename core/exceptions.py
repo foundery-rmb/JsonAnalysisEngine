@@ -8,7 +8,7 @@ class Error(Exception):
 
 class BindError(Error):
     """
-    This is raised when someone tries to bind an action to the action/event/time dispatcher
+    This is raised when someone tries to bind an action to an event dispatcher
     that doesn't have exist
     """
 

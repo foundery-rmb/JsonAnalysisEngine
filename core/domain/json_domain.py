@@ -1,12 +1,17 @@
 
 class BaseNode(object):
-    
+    value = None
+    key = None
+
     def __init__(self, value):
         if isinstance(value, dict):
             self.raw_json = value
 
     def get_parent(self):
         return self.raw_json.parent
+
+    def get_value(self):
+        return self.raw_json.value
 
     def get_all_nodes_with_same_value(self): pass
 

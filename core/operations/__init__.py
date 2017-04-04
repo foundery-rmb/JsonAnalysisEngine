@@ -1,12 +1,8 @@
 from JsonAnalysisEngine.utils import JsonObject
 from JsonAnalysisEngine.internal.factory import Factory
-from JsonAnalysisEngine.core.domain.json_domain import ListNode
-from JsonAnalysisEngine.core.domain.json_domain import TreeNode
-from JsonAnalysisEngine.core.domain.json_domain import ValueNode
 from JsonAnalysisEngine.core.exceptions import BindError, ElementBuildError
 
-import JsonAnalysisEngine.core.domain.json_domain as domain
-
+from JsonAnalysisEngine.core.domain import json_domain as domain
 import weakref
 
 
@@ -23,8 +19,8 @@ class NodeExplorer(object):
         this method is hooked on the `json_traversal` recursion loop
         """
         node_class = domain.get_node_type(node_info)  # returns ValueNode, ListNode or TreeNode class
-        node = node_definition(node_info)  # instantiate the class
-
+        node = node_class(node_info)  # instantiate the class
+        print node
 
     def attach_action(self, action):
         """
@@ -132,8 +128,6 @@ class CoreOperations(object):
                     if isinstance(val, dict):
                         self.json_traversal(val, func, depth)
         func(None, event='on_done')
-        
-        
 
 Factory.register('CoreOperations', cls=CoreOperations())
 Factory.register('ElementBuilder', cls=NodeExplorer())
