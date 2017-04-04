@@ -22,7 +22,9 @@ class NodeExplorer(object):
         """
         this method is hooked on the `json_traversal` recursion loop
         """
-        print domain.get_node_type(node_info)
+        node_class = domain.get_node_type(node_info)  # returns ValueNode, ListNode or TreeNode class
+        node = node_definition(node_info)  # instantiate the class
+
 
     def attach_action(self, action):
         """
@@ -96,7 +98,8 @@ class CoreOperations(object):
             """
             This callback function will process info and call bound methods
             """
-            info = JsonObject(info)
+            if info is None:
+                return self._on_traversal_done(info)
             if isinstance(info.value, dict):
                 info['value'] = JsonObject(info.value)
             if isinstance(info.key, dict):
@@ -120,7 +123,7 @@ class CoreOperations(object):
         for key in json_dict.keys():
             info['key'] = key
             info['value'] = json_dict[key]
-            info['parent'] = json_dict
+            info['parent'] = parent
             func(info, event='on_traversal')
             if isinstance(json_dict[key], dict):
                 self.json_traversal(json_dict[key], func, depth + 1)

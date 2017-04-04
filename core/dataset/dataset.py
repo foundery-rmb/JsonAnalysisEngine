@@ -1,11 +1,23 @@
 
+from JsonAnalysisEngine.internal.factory import Factory
+
+
+class DatasetBase(object):
+    pass
+
+
+class KeysDataset(DatasetBase, list):
+    pass
+
+
+class ValuesDataset(DatasetBase, list):
+    pass
+
+
 class Dataset(object):
-    pass
 
+    def __init__(self):
+        self.keys_dataset = KeysDataset()
+        self.values_dataset = ValuesDataset()
 
-class KeysDataset(Dataset, list):
-    pass
-
-
-class ValuesDataset(Dataset, list):
-    pass
+Factory.register('Dataset', cls=Dataset())

@@ -1,2 +1,2 @@
 
-import JsonAnalysisEngine.core.operations
+import JsonAnalysisEngine.core
