@@ -1,5 +1,5 @@
 
-from JsonAnalysisEngine.internal.factory import Factory
+from jae.internal.factory import Factory
 
 import collections
 

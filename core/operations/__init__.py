@@ -1,8 +1,8 @@
-from JsonAnalysisEngine.utils import JsonObject
-from JsonAnalysisEngine.internal.factory import Factory
-from JsonAnalysisEngine.core.exceptions import BindError, ElementBuildError
+from jae.utils import JsonObject
+from jae.internal.factory import Factory
+from jae.core.exceptions import BindError, ElementBuildError
 
-from JsonAnalysisEngine.core.domain import json_domain as domain
+from jae.core.domain import json_domain as domain
 import weakref
 
 
