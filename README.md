@@ -32,6 +32,8 @@ cd jae
 python setup.py build
 ```
 
+if successfull then run
+
 ```
 python setup.py install
 ```
