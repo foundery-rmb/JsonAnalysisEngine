@@ -18,11 +18,11 @@ class ValuesContainer(DatasetBase):
 class Dataset(object):
 
     def __init__(self):
-        self.keys_container = get_container(KeysContainer)
-        self.values_container = get_container(ValuesContainer)
+        self.keys_container = CreateContainer(KeysContainer)
+        self.values_container = CreateContainer(ValuesContainer)
 
 
-def MakeContainer(container_class, *args, **kwargs):
+def CreateContainer(container_class, *args, **kwargs):
     """
     factory entry point for containers
     """

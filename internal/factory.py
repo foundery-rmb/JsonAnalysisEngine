@@ -53,31 +53,11 @@ class FactoryBase(object):
         super(FactoryBase, self).__init__()
         self.classes = {}
 
-    def is_template(self, classname):
-        '''Return True if the classname is a template from the
-        :class:`~kivy.lang.Builder`.
 
-        .. versionadded:: 1.0.5
-        '''
-        if classname in self.classes:
-            return self.classes[classname]['is_template']
-        else:
-            return False
-
-    def register(self, classname, cls=None, module=None, is_template=False,
-                 baseclasses=None, filename=None, warn=False):
+    def register(self, classname, cls=None, warn=False):
         '''Register a new classname referring to a real class or
         class definition in a module. Warn, if True will emit a warning message
         when a class is re-declared.
-
-        .. versionchanged:: 1.9.0
-            `warn` was added.
-
-        .. versionchanged:: 1.7.0
-            :attr:`baseclasses` and :attr:`filename` added
-
-        .. versionchanged:: 1.0.5
-            :attr:`is_template` has been added in 1.0.5.
         '''
         if cls is None and module is None and baseclasses is None:
             raise ValueError(
@@ -93,11 +73,8 @@ class FactoryBase(object):
                        baseclasses, filename))
             return
         self.classes[classname] = {
-            'module': module,
-            'cls': cls,
-            'is_template': is_template,
-            'baseclasses': baseclasses,
-            'filename': filename}
+            'cls': cls
+            }
 
     def unregister(self, *classnames):
         '''Unregisters the classnames previously registered via the
@@ -109,17 +86,6 @@ class FactoryBase(object):
         for classname in classnames:
             if classname in self.classes:
                 self.classes.pop(classname)
-
-    def unregister_from_filename(self, filename):
-        '''Unregister all the factory objects related to the filename passed in
-        the parameter.
-
-        .. versionadded:: 1.7.0
-        '''
-        to_remove = [x for x in self.classes
-                     if self.classes[x]['filename'] == filename]
-        for name in to_remove:
-            del self.classes[name]
 
     def create_object(self, _class, *args):
         """
@@ -141,26 +107,6 @@ class FactoryBase(object):
 
         item = classes[name]
         cls = item['cls']
-
-        # No class to return, import the module
-        if cls is None:
-            if item['module']:
-                module = __import__(name=item['module'], fromlist='.')
-                if not hasattr(module, name):
-                    raise FactoryException(
-                        'No class named <%s> in module <%s>' % (
-                            name, item['module']))
-                cls = item['cls'] = getattr(module, name)
-
-            elif item['baseclasses']:
-                rootwidgets = []
-                for basecls in item['baseclasses'].split('+'):
-                    rootwidgets.append(Factory.get(basecls))
-                cls = item['cls'] = type(str(name), tuple(rootwidgets), {})
-
-            else:
-                raise FactoryException('No information to create the class')
-
         return cls
 
     get = __getattr__
