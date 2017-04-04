@@ -1,2 +1,1 @@
-
-import dataset
+from dataset import *
