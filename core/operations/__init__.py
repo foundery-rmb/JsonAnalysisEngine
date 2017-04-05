@@ -1,9 +1,21 @@
-from jae.utils import JsonObject
 from jae.internal.factory import Factory
-from jae.core.exceptions import BindError, ElementBuildError
-
 from jae.core.domain import json_domain as domain
-import weakref
+
+
+class NodeTable(object):
+    nodes = {}
+
+    def add_node(self, node):
+        key = hash(node)
+        self.nodes[key] = node
+
+    def get_node(self, hash_key):
+        if isinstance(hash_key, dict) or isinstance(hash_key, Factory.BaseNode):
+            hash_key = hash(hash_key)
+        return self.nodes.get(hash_key)
+
+    def get_all_nodes(self):
+        return self.nodes.values()
 
 
 class NodeExplorer(object):
@@ -18,9 +30,12 @@ class NodeExplorer(object):
         """
         this method is hooked on the `json_traversal` recursion loop
         """
+
         node_class = domain.get_node_type(node_info)  # returns ValueNode, ListNode or TreeNode class
         node = Factory.create_object(node_class, node_info)  # instantiate the class
-        print node
+        Factory.NodeTable.add_node(node)
+        print node.get_parent()
+
 
     def attach_action(self, action):
         """
@@ -97,9 +112,9 @@ class CoreOperations(object):
             if info is None:
                 return self._on_traversal_done(info)
             if isinstance(info.value, dict):
-                info['value'] = JsonObject(info.value)
+                info['value'] = Factory.JsonObject(info.value)
             if isinstance(info.key, dict):
-                info['key'] = JsonObject(info.key)
+                info['key'] = Factory.JsonObject(info.key)
             if event == 'on_traversal':
                 self._on_traversal(info)
             elif event == 'on_traversal_done':
@@ -114,8 +129,8 @@ class CoreOperations(object):
         tree the algorithm calls `func`.
         """
 
-        info = JsonObject({'depth': depth})
-        parent = json_dict
+        info = Factory.JsonObject({'depth': depth})
+        parent = Factory.JsonObject(json_dict)
         for key in json_dict.keys():
             info['key'] = key
             info['value'] = json_dict[key]
@@ -131,3 +146,4 @@ class CoreOperations(object):
 
 Factory.register('CoreOperations', cls=CoreOperations())
 Factory.register('ElementBuilder', cls=NodeExplorer())
+Factory.register('NodeTable', cls=NodeTable())

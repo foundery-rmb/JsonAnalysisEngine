@@ -20,3 +20,7 @@ class EngineCrash(Error):
 
 class ElementBuildError(Error):
     pass
+
+
+class NodeError(Error):
+    pass
